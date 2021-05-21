@@ -91,9 +91,16 @@ fn parse_asm(asm: &str, pc: u8) -> Result<u8, String> {
                     None => break,
                 }
             }
-            let opt1 = parse_register(&opt1)?;
-            let opt2 = parse_register(&opt2)?;
-            opt = (opt1 & 0x3) << 2 | (opt2 & 0x3);
+            let _opt1;
+            let _opt2;
+            if opcode == 6 {
+                _opt2 = parse_register(&opt1)?;
+                _opt1 = parse_register(&opt2)?;
+            } else {
+                _opt1 = parse_register(&opt1)?;
+                _opt2 = parse_register(&opt2)?;
+            }
+            opt = (_opt1 & 0x3) << 2 | (_opt2 & 0x3);
         }
         // 单操作数
         4 | 7 | 8 | 9 | 10 => {
@@ -110,7 +117,7 @@ fn parse_asm(asm: &str, pc: u8) -> Result<u8, String> {
                 4 | 9 => opt = (parse_register(&opt1)? & 0x3) << 2,
                 10 => opt = parse_register(&opt1)? & 0x3,
                 7 | 8 => match u8::from_str_radix(&opt1.trim_end_matches("h"), 16) {
-                    Ok(n) => opt = ((pc as i8 - n as i8) as u8) & 0xF,
+                    Ok(n) => opt = ((n as i8 - pc as i8) as u8) & 0xF,
                     Err(_) => return Err(format!("转换offset`{}`出错", opt1).to_string()),
                 },
                 _ => (),
@@ -149,7 +156,7 @@ fn main() -> std::io::Result<()> {
             println!("成功编译");
             for (i, code) in codes.iter().enumerate() {
                 result_content
-                    .push_str(format!("{:04b}:  {:08b} {}\n", i + 1, code.1, code.0).as_str());
+                    .push_str(format!("{:04b}:  {:08b} {}\n", i, code.1, code.0).as_str());
             }
         }
         Err(e) => eprintln!("编译时遇到错误: {}", e),
