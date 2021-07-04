@@ -1,6 +1,6 @@
 [package]
 name = "tec-8-compiler"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["hyiker <hyiker@bupt.edu.cn>"]
 edition = "2018"
 
